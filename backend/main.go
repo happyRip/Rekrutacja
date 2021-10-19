@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"time"
 
-	"./handler"
-	"./waiter"
+	"github.com/happyRip/Rekrutacja/backend/portier"
+	"github.com/happyRip/Rekrutacja/backend/waiter"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -23,8 +23,8 @@ func main() {
 	r.Use(middleware.Timeout(60 * time.Second))
 	r.Use(render.SetContentType(render.ContentTypeJSON))
 
-	var reservations handler.ListOfReservations
-	var tables waiter.ListOfTables
+	reservations := &portier.Reservations
+	tables := &waiter.Tables
 
 	r.Route("/reservations", func(r chi.Router) {
 		r.Post("/", reservations.NewReservation)
@@ -35,7 +35,6 @@ func main() {
 			r.Delete("/", reservations.DeleteReservation)
 		})
 	})
-
 	r.Get("/tables", tables.GetTables)
 
 	http.ListenAndServe(":3000", r)
