@@ -100,9 +100,6 @@ func (t ListOfTables) GetTables(w http.ResponseWriter, r *http.Request) {
 
 	// TODO:
 	// * check if params are valid
-	// * check reservation timeframe
 	// * send email to user
-	// * append reservation
 	json.NewEncoder(w).Encode(tables)
-	return
 }

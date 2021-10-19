@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	uuid "github.com/satori/go.uuid"
 )
 
 const LayoutISO = "2006-01-02T15:04:05-0700"
@@ -73,6 +75,26 @@ func (b *ListOfReservations) NewReservation(w http.ResponseWriter, r *http.Reque
 		log.Println(err)
 		return
 	}
+	params.ID = uuid.NewV4().String()
+
+	start, err := time.Parse(LayoutISO, params.Date)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	end := start.Add(time.Minute * time.Duration(params.Duration))
+	for _, r := range Reservations.Bookings {
+		if r.IsTableOccupied(start, end) {
+			// TODO send response
+			log.Printf("Failed to make reservation of given parameters:\n%#v\n", params)
+			return
+		}
+	}
+
+	Reservations.Bookings = append(Reservations.Bookings, params)
+	log.Printf("Made a reservation with parameters:\n%#v\n", params)
+	// TODO send response
+	// json.NewEncoder(w).Encode(params)
 }
 
 func (b *ListOfReservations) GetReservations(w http.ResponseWriter, r *http.Request) {
@@ -85,6 +107,37 @@ func (b *ListOfReservations) GetReservations(w http.ResponseWriter, r *http.Requ
 		log.Println(err)
 		return
 	}
+
+	d, err := time.Parse(LayoutISO, params.Date)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	toDate := func(t time.Time) struct{ day, month, year int } {
+		y, m, d := t.Date()
+		return struct {
+			day, month, year int
+		}{
+			day:   d,
+			month: int(m),
+			year:  y,
+		}
+	}
+	date := toDate(d)
+
+	var out []Reservation
+	for _, r := range b.Bookings {
+		t, err := time.Parse(LayoutISO, r.Date)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+		if d := toDate(t); date == d {
+			out = append(out, r)
+		}
+	}
+
+	json.NewEncoder(w).Encode(out)
 }
 
 func (b *ListOfReservations) CancelReservation(w http.ResponseWriter, r *http.Request) {
