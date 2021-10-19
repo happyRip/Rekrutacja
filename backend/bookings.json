@@ -1,0 +1,14 @@
+{
+    "bookings": [
+        {
+            "date": "2015-10-15T12:38:30-0200",
+            "duration": 90,
+            "seatNumber": 5,
+            "fullName": "Rosie Boyle",
+            "phone": "+48 606 656 969",
+            "email": "rosieboyle@ozean.com",
+            "numberOfSeats": 3,
+            "id": "616ebf88128e31abd4327937"
+        }
+    ]
+}
